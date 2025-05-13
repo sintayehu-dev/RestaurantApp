@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	jwt "github.com/golang-jwt/jwt/v4"
-	"github.com/sintayehu-dev/go_jwt_auth/databases"
-	"github.com/sintayehu-dev/go_jwt_auth/models"
+	"github.com/RestaurantApp/databases"
+	"github.com/RestaurantApp/models"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type SignedDetails struct {

@@ -4,11 +4,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/RestaurantApp/databases"
+	"github.com/RestaurantApp/middleware"
+	"github.com/RestaurantApp/models"
+	routes "github.com/RestaurantApp/routes"
 	"github.com/gin-gonic/gin"
-	"github.com/sintayehu-dev/go_jwt_auth/databases"
-	"github.com/sintayehu-dev/go_jwt_auth/middleware"
-	"github.com/sintayehu-dev/go_jwt_auth/models"
-	routes "github.com/sintayehu-dev/go_jwt_auth/routes"
 	"gorm.io/gorm"
 )
 

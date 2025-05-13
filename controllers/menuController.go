@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sintayehu-dev/go_jwt_auth/databases"
-	"github.com/sintayehu-dev/go_jwt_auth/helpers"
-	"github.com/sintayehu-dev/go_jwt_auth/models"
+	"github.com/RestaurantApp/databases"
+	"github.com/RestaurantApp/helpers"
+	"github.com/RestaurantApp/models"
 )
 
 // GetMenus retrieves all restaurant menus

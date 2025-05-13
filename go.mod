@@ -1,4 +1,4 @@
-module github.com/sintayehu-dev/go_jwt_auth
+module github.com/RestaurantApp
 
 go 1.24.2
 

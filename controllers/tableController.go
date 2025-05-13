@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/RestaurantApp/databases"
+	"github.com/RestaurantApp/helpers"
+	"github.com/RestaurantApp/models"
 	"github.com/gin-gonic/gin"
-	"github.com/sintayehu-dev/go_jwt_auth/databases"
-	"github.com/sintayehu-dev/go_jwt_auth/helpers"
-	"github.com/sintayehu-dev/go_jwt_auth/models"
 )
 
 // GetTables retrieves all tables in the restaurant

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/RestaurantApp/helpers"
 	"github.com/gin-gonic/gin"
-	"github.com/sintayehu-dev/go_jwt_auth/helpers"
 )
 
 func Authenticate() gin.HandlerFunc {

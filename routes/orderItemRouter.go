@@ -1,8 +1,8 @@
 package routes
 
 import (
+	controllers "github.com/RestaurantApp/controllers"
 	"github.com/gin-gonic/gin"
-	controllers "github.com/sintayehu-dev/go_jwt_auth/controllers"
 )
 
 func OrderItemRoutes(incomingRoutes *gin.Engine) {

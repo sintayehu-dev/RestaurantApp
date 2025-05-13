@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/RestaurantApp/databases"
+	"github.com/RestaurantApp/helpers"
+	"github.com/RestaurantApp/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/sintayehu-dev/go_jwt_auth/databases"
-	"github.com/sintayehu-dev/go_jwt_auth/helpers"
-	"github.com/sintayehu-dev/go_jwt_auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
