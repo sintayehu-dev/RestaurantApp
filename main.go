@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -8,12 +9,45 @@ import (
 	"github.com/sintayehu-dev/go_jwt_auth/middleware"
 	"github.com/sintayehu-dev/go_jwt_auth/models"
 	routes "github.com/sintayehu-dev/go_jwt_auth/routes"
+	"gorm.io/gorm"
 )
 
-func main() {
+func InitializeDatabase(db *gorm.DB) error {
+	// Skip foreign key constraint checks during migration
+	// Migrate all models one by one
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.Table{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.Menu{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.Food{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.Note{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.Order{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.OrderItem{}); err != nil {
+		return err
+	}
+	if err := db.AutoMigrate(&models.Invoice{}); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func main() {
 	db := databases.InitDB()
-	db.AutoMigrate(&models.User{})
+	if err := InitializeDatabase(db); err != nil {
+		log.Fatal("Failed to migrate database: ", err)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {

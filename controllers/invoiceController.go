@@ -11,6 +11,7 @@ import (
 	"github.com/sintayehu-dev/go_jwt_auth/models"
 )
 
+// GetInvoices retrieves all invoices (admin only)
 func GetInvoices() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := helpers.CheckUserType(c, "ADMIN"); err != nil {
@@ -31,6 +32,7 @@ func GetInvoices() gin.HandlerFunc {
 	}
 }
 
+// GetInvoice retrieves a specific invoice (customers can only view their own)
 func GetInvoice() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
@@ -59,6 +61,41 @@ func GetInvoice() gin.HandlerFunc {
 	}
 }
 
+// GetUserInvoices retrieves all invoices for the current logged-in user
+func GetUserInvoices() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := c.GetString("uid")
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		var orders []models.Order
+		if err := databases.DB.WithContext(ctx).Where("user_id = ?", userId).Find(&orders).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to retrieve your orders. Please try again later."})
+			return
+		}
+
+		if len(orders) == 0 {
+			c.JSON(http.StatusOK, []models.Invoice{})
+			return
+		}
+
+		var orderIds []string
+		for _, order := range orders {
+			orderIds = append(orderIds, order.OrderID)
+		}
+
+		var invoices []models.Invoice
+		if err := databases.DB.WithContext(ctx).Where("order_id IN ?", orderIds).Find(&invoices).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to retrieve your invoices. Please try again later."})
+			return
+		}
+
+		c.JSON(http.StatusOK, invoices)
+	}
+}
+
+// CreateInvoice generates a new invoice for an order (admin only)
 func CreateInvoice() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := helpers.CheckUserType(c, "ADMIN"); err != nil {
@@ -75,15 +112,22 @@ func CreateInvoice() gin.HandlerFunc {
 			return
 		}
 
-		var orderExists int64
-		if err := databases.DB.WithContext(ctx).Model(&models.Order{}).Where("order_id = ?", invoice.OrderID).Count(&orderExists).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to verify order information. Please try again later."})
+		var order models.Order
+		if err := databases.DB.WithContext(ctx).Where("order_id = ?", invoice.OrderID).First(&order).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "The order referenced in this invoice could not be found"})
 			return
 		}
 
-		if orderExists == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "The order referenced in this invoice could not be found"})
-			return
+		if invoice.PaymentStatus == "" {
+			invoice.PaymentStatus = "pending"
+		}
+
+		if invoice.TotalAmount == 0 {
+			invoice.TotalAmount = order.OrderTotal
+		}
+
+		if invoice.PaymentDueDate.IsZero() {
+			invoice.PaymentDueDate = time.Now().AddDate(0, 0, 7)
 		}
 
 		if err := databases.DB.WithContext(ctx).Create(&invoice).Error; err != nil {
@@ -91,10 +135,13 @@ func CreateInvoice() gin.HandlerFunc {
 			return
 		}
 
+		databases.DB.WithContext(ctx).Model(&order).Update("order_status", "invoiced")
+
 		c.JSON(http.StatusCreated, invoice)
 	}
 }
 
+// UpdateInvoice modifies an existing invoice (admin only)
 func UpdateInvoice() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := helpers.CheckUserType(c, "ADMIN"); err != nil {
@@ -135,5 +182,38 @@ func UpdateInvoice() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, invoice)
+	}
+}
+
+// DeleteInvoice removes an invoice from the system (admin only)
+func DeleteInvoice() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if err := helpers.CheckUserType(c, "ADMIN"); err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to delete invoices"})
+			return
+		}
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		invoiceId := c.Param("invoice_id")
+
+		var invoice models.Invoice
+		if err := databases.DB.WithContext(ctx).Where("invoice_id = ?", invoiceId).First(&invoice).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "The invoice you're trying to delete could not be found"})
+			return
+		}
+
+		if invoice.PaymentStatus == "paid" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Paid invoices cannot be deleted"})
+			return
+		}
+
+		if err := databases.DB.WithContext(ctx).Where("invoice_id = ?", invoiceId).Delete(&invoice).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to delete invoice. Please try again later."})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Invoice has been successfully deleted"})
 	}
 }

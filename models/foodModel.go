@@ -13,5 +13,5 @@ type Food struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	FoodID    string    `json:"food_id" gorm:"required;uniqueIndex"`
 	MenuID    string    `json:"menu_id" gorm:"required"`
-	Menu      Menu      `json:"menu" gorm:"foreignKey:MenuID;references:MenuID"`
+	Menu      Menu      `json:"-" gorm:"foreignKey:MenuID;references:MenuID"`
 }

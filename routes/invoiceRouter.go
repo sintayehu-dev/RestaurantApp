@@ -6,10 +6,16 @@ import (
 )
 
 func InvoiceRoutes(incomingRoutes *gin.Engine) {
-	incomingRoutes.GET("/invoices", controllers.GetInvoices())
-	incomingRoutes.GET("/invoices/:invoice_id", controllers.GetInvoice())
-	incomingRoutes.POST("/invoices", controllers.CreateInvoice())
-	incomingRoutes.PATCH("/invoices/:invoice_id", controllers.UpdateInvoice())
-						
+	// Admin-only routes - restricted to restaurant staff
+	incomingRoutes.GET("/invoices", controllers.GetInvoices())                  
+	incomingRoutes.POST("/invoices", controllers.CreateInvoice())               
+	incomingRoutes.PATCH("/invoices/:invoice_id", controllers.UpdateInvoice())  
+	incomingRoutes.DELETE("/invoices/:invoice_id", controllers.DeleteInvoice()) 
+
+	// Mixed access routes - permission checked inside controller
+	incomingRoutes.GET("/invoices/:invoice_id", controllers.GetInvoice()) 
 	
+
+	// Customer-specific routes
+	incomingRoutes.GET("/user-invoices", controllers.GetUserInvoices()) 
 }

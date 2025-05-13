@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -21,9 +22,9 @@ type User struct {
 	UserID       string    `gorm:"size:100;uniqueIndex" json:"user_id"`
 }
 
-
 func (user *User) BeforeCreate(tx *gorm.DB) (err error) {
 	if user.UserID == "" {
+		user.UserID = uuid.New().String()
 	}
 	return nil
 }

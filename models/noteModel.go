@@ -12,5 +12,5 @@ type Note struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	NoteID    string    `json:"note_id" gorm:"required;uniqueIndex"`
 	UserID    string    `json:"user_id" gorm:"required"`
-	User      User      `json:"user" gorm:"foreignKey:UserID;references:UserID"`
+	User      User      `json:"-" gorm:"foreignKey:UserID;references:UserID"`
 }
